@@ -1,0 +1,2 @@
+diskutil unmount EFI
+exit
