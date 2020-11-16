@@ -1,2 +1,1 @@
 diskutil unmount EFI
-exit
