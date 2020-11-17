@@ -17,43 +17,43 @@ function setVerbose() {
 }
 
 function switchToOCRelease() {
-  echo
-  echo
-  echo
-  echo
-  echo
-  echo "Replacing files..."
+  # echo
+  # echo
+  # echo
+  # echo
+  # echo
+  # echo "Replacing files..."
   cp RELEASE/OpenCore.efi $EFIFolder/OC
   cp RELEASE/Bootstrap.efi $EFIFolder/OC/Bootstrap
   cp RELEASE/OpenRuntime.efi $EFIFolder/OC/Drivers
   cp RELEASE/BOOTx64.efi $EFIFolder/BOOT
 
-  echo ""
-  echo "Changing config..."
+  # echo ""
+  # echo "Changing config..."
   plutil -replace "Misc.Debug.Target" -integer 3 $configFilePath
   setVerbose "disable"
-  echo ""
-  read -t 5 -p "Done. Exiting..."
+  # echo ""
+  # read -t 5 -p "Done. Exiting..."
 }
 
 function switchToOCDebug() {
-  echo
-  echo
-  echo
-  echo
-  echo
-  echo "Replacing files..."
+  # echo
+  # echo
+  # echo
+  # echo
+  # echo
+  # echo "Replacing files..."
   cp DEBUG/OpenCore.efi $EFIFolder/OC
   cp DEBUG/Bootstrap.efi $EFIFolder/OC/Bootstrap
   cp DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers
   cp DEBUG/BOOTx64.efi $EFIFolder/BOOT
 
-  echo ""
-  echo "Changing config..."
+  # echo ""
+  # echo "Changing config..."
   plutil -replace "Misc.Debug.Target" -integer 67 $configFilePath
   setVerbose "enable"
-  echo ""
-  read -t 5 -p "Done. Exiting..."
+  # echo ""
+  # read -t 5 -p "Done. Exiting..."
 }
 
 function printInfo() {
@@ -99,6 +99,13 @@ function printInfo() {
   debugOpenRuntimeFileNOTFound="$(diff DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers/OpenRuntime.efi)"
   if [[ $releaseOpenRuntimeFileNOTFound ]]; then echo -e "   \033[1mOpenRuntime.efi: \033[2mDebug"; fi
   if [[ $debugOpenRuntimeFileNOTFound ]]; then echo -e "   \033[1mOpenRuntime.efi: \033[2mRelease"; fi
+
+  tput sgr0
+  echo
+  echo
+  echo
+  echo
+  echo
 }
 
 if [[ ! $(mount | awk '$3 == "/Volumes/EFI" {print $3}') ]]; then
@@ -110,11 +117,36 @@ if [[ ! $(mount | awk '$3 == "/Volumes/EFI" {print $3}') ]]; then
   clear
   read -t 5 -p "Problems with mounting EFI Partition. Exiting..."
 else
-  bootArgs="$(plutil -extract $bootArgsPath xml1 -o - $configFilePath | grep string | awk -F "[><]" '{print $3}')"
-  isVerbose="$(echo $bootArgs | awk '/-v/ {print}')"
 
-  # switchToOCRelease
-  # switchToOCDebug
-  printInfo
+  while true; do
+    bootArgs="$(plutil -extract $bootArgsPath xml1 -o - $configFilePath | grep string | awk -F "[><]" '{print $3}')"
+    isVerbose="$(echo $bootArgs | awk '/-v/ {print}')"
+    printInfo
+
+    options=("Switch to OpenCore Release" "Switch to OpenCore Debug" "Toggle verbose mode" "Quit")
+
+    echo "Choose an option: "
+    select opt in "${options[@]}"; do
+      case $REPLY in
+      1)
+        switchToOCRelease
+        break
+        ;;
+      2)
+        switchToOCDebug
+        break
+        ;;
+      3)
+        if [[ $isVerbose ]]; then setVerbose "disable"; fi
+        if [[ ! $isVerbose ]]; then setVerbose "enable"; fi
+        break
+        ;;
+      4) break 2 ;;
+      *) echo "What's that?" >&2 ;;
+      esac
+    done
+  done
+
+  echo "Bye bye!"
 
 fi
