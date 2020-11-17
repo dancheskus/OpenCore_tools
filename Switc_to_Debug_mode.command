@@ -17,47 +17,29 @@ function setVerbose() {
 }
 
 function switchToOCRelease() {
-  # echo
-  # echo
-  # echo
-  # echo
-  # echo
-  # echo "Replacing files..."
   cp RELEASE/OpenCore.efi $EFIFolder/OC
   cp RELEASE/Bootstrap.efi $EFIFolder/OC/Bootstrap
   cp RELEASE/OpenRuntime.efi $EFIFolder/OC/Drivers
   cp RELEASE/BOOTx64.efi $EFIFolder/BOOT
 
-  # echo ""
-  # echo "Changing config..."
   plutil -replace "Misc.Debug.Target" -integer 3 $configFilePath
   setVerbose "disable"
-  # echo ""
-  # read -t 5 -p "Done. Exiting..."
 }
 
 function switchToOCDebug() {
-  # echo
-  # echo
-  # echo
-  # echo
-  # echo
-  # echo "Replacing files..."
   cp DEBUG/OpenCore.efi $EFIFolder/OC
   cp DEBUG/Bootstrap.efi $EFIFolder/OC/Bootstrap
   cp DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers
   cp DEBUG/BOOTx64.efi $EFIFolder/BOOT
 
-  # echo ""
-  # echo "Changing config..."
   plutil -replace "Misc.Debug.Target" -integer 67 $configFilePath
   setVerbose "enable"
-  # echo ""
-  # read -t 5 -p "Done. Exiting..."
 }
 
 function printInfo() {
   clear
+
+  echo -e "\033[44mThis app is working only with OC version 0.6.3"; tput sgr0; echo
 
   nvramOCRecord="$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version | awk '{print $2}')"
   nvramOCMode="$(echo $nvramOCRecord | awk -F- '{print $1}')"
@@ -125,7 +107,7 @@ else
 
     options=("Switch to OpenCore Release" "Switch to OpenCore Debug" "Toggle verbose mode" "Quit")
 
-    echo "Choose an option: "
+    echo -e "\033[44mChoose an option:"; tput sgr0; echo
     select opt in "${options[@]}"; do
       case $REPLY in
       1)
