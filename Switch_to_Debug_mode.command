@@ -91,13 +91,15 @@ function printInfo() {
 }
 
 if [[ ! $(mount | awk '$3 == "/Volumes/EFI" {print $3}') ]]; then
-  echo "Mounting EFI Partition. Enter password if neaded."
+  clear
+  echo -e "\033[44mMounting EFI Partition. Enter password if neaded."; tput sgr0; echo
+
   sudo diskutil mount EFI
 fi
 
 if [[ ! $(mount | awk '$3 == "/Volumes/EFI" {print $3}') ]]; then
   clear
-  read -t 5 -p "Problems with mounting EFI Partition. Exiting..."
+  read -t 2 -p "Problems with mounting EFI Partition. Exiting..."
 else
 
   while true; do
