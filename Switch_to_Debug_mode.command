@@ -28,24 +28,15 @@ setVerbose() {
   if [[ $1 == "disable" && $isVerbose ]]; then replaceBootArgs "$bootArgsWithoutVebose"; fi
 }
 
-switchToOCRelease() {
-  cp RELEASE/OpenCore.efi $EFIFolder/OC
-  cp RELEASE/Bootstrap.efi $EFIFolder/OC/Bootstrap
-  cp RELEASE/OpenRuntime.efi $EFIFolder/OC/Drivers
-  cp RELEASE/BOOTx64.efi $EFIFolder/BOOT
+switchOCMode() {
+  # if $1 != DEBUG function will work as "RELEASE"
+  cp $1/OpenCore.efi $EFIFolder/OC
+  cp $1/Bootstrap.efi $EFIFolder/OC/Bootstrap
+  cp $1/OpenRuntime.efi $EFIFolder/OC/Drivers
+  cp $1/BOOTx64.efi $EFIFolder/BOOT
 
-  replaceDebugTarget 3
-  setVerbose "disable"
-}
-
-switchToOCDebug() {
-  cp DEBUG/OpenCore.efi $EFIFolder/OC
-  cp DEBUG/Bootstrap.efi $EFIFolder/OC/Bootstrap
-  cp DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers
-  cp DEBUG/BOOTx64.efi $EFIFolder/BOOT
-
-  replaceDebugTarget 67
-  setVerbose "enable"
+  [[ $1 == "DEBUG" ]] && replaceDebugTarget 67 || replaceDebugTarget 3
+  [[ $1 == "DEBUG" ]] && setVerbose "enable" || setVerbose "disable"
 }
 
 printHeader() { printf "\033[44m$1\n"; tput sgr0; }
@@ -120,8 +111,8 @@ else
     COLUMNS=0
     select opt in "${options[@]}"; do
       case $REPLY in
-        1) switchToOCRelease; break ;;
-        2) switchToOCDebug; break ;;
+        1) switchOCMode "RELEASE"; break ;;
+        2) switchOCMode "DEBUG"; break ;;
         3) [[ $isVerbose ]] && setVerbose "disable" || setVerbose "enable"; break ;;
         4) break 2 ;;
         *) echo "What's that?" >&2 ;;
