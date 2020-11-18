@@ -80,33 +80,20 @@ printInfo() {
 
   printTitle "File versions in EFI partition:"
 
+  printFileVersion() {
+    # $1: File name; $2: File path in EFI Volume
+    
+    releaseFileNOTFound="$(diff RELEASE/$1 $EFIFolder/$2/$1)"
+    debugFileNOTFound="$(diff DEBUG/$1 $EFIFolder/$2/$1)"
+    printKey $1
+    if [[ $releaseFileNOTFound ]]; then printValue "Debug"; fi
+    if [[ $debugFileNOTFound ]]; then printValue "Release"; fi
+  }
 
-  releaseBootFileNOTFound="$(diff RELEASE/BOOTx64.efi $EFIFolder/BOOT/BOOTx64.efi)"
-  debugBootFileNOTFound="$(diff DEBUG/BOOTx64.efi $EFIFolder/BOOT/BOOTx64.efi)"
-  printKey "BOOTx64.efi"
-  if [[ $releaseBootFileNOTFound ]]; then printValue "Debug"; fi
-  if [[ $debugBootFileNOTFound ]]; then printValue "Release"; fi
-  
-
-  releaseOpenCoreFileNOTFound="$(diff RELEASE/OpenCore.efi $EFIFolder/OC/OpenCore.efi)"
-  debugOpenCoreFileNOTFound="$(diff DEBUG/OpenCore.efi $EFIFolder/OC/OpenCore.efi)"
-  printKey "OpenCore.efi"
-  if [[ $releaseOpenCoreFileNOTFound ]]; then printValue "Debug"; fi
-  if [[ $debugOpenCoreFileNOTFound ]]; then printValue "Release"; fi
-  
-
-  releaseBootstrapFileNOTFound="$(diff RELEASE/Bootstrap.efi $EFIFolder/OC/Bootstrap/Bootstrap.efi)"
-  debugBootstrapFileNOTFound="$(diff DEBUG/Bootstrap.efi $EFIFolder/OC/Bootstrap/Bootstrap.efi)"
-  printKey "Bootstrap.efi"
-  if [[ $releaseBootstrapFileNOTFound ]]; then printValue "Debug"; fi
-  if [[ $debugBootstrapFileNOTFound ]]; then printValue "Release"; fi
-  
-
-  releaseOpenRuntimeFileNOTFound="$(diff RELEASE/OpenRuntime.efi $EFIFolder/OC/Drivers/OpenRuntime.efi)"
-  debugOpenRuntimeFileNOTFound="$(diff DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers/OpenRuntime.efi)"
-  printKey "OpenRuntime.efi"
-  if [[ $releaseOpenRuntimeFileNOTFound ]]; then printValue "Debug"; fi
-  if [[ $debugOpenRuntimeFileNOTFound ]]; then printValue "Release"; fi
+  printFileVersion "BOOTx64.efi" "BOOT"
+  printFileVersion "OpenCore.efi" "OC"
+  printFileVersion "Bootstrap.efi" "OC/Bootstrap"
+  printFileVersion "OpenRuntime.efi" "OC/Drivers"
   
   echo; echo; echo; echo; echo;
 }
