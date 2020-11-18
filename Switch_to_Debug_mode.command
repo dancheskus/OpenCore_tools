@@ -9,6 +9,18 @@ bootArgsPath="NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.boot-args"
 bootArgs=""
 isVerbose=""
 
+function replacePlist() {  
+  plutil -replace $1 $2 "$3" "$configFilePath"
+}
+
+function replaceBootArgs() {
+  replacePlist "NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.boot-args" "-string" "$1"
+}
+
+function replaceDebugTarget() {
+  replacePlist "Misc.Debug.Target" "-integer" $1
+}
+
 function updateIsVerbose() {
   bootArgs="$(plutil -extract $bootArgsPath xml1 -o - $configFilePath | grep string | awk -F "[><]" '{print $3}')"
   isVerbose="$(echo $bootArgs | awk '/-v/ {print}')"
@@ -20,8 +32,8 @@ function setVerbose() {
 
   updateIsVerbose
 
-  if [[ $1 == "enable" && ! $isVerbose ]]; then plutil -replace $bootArgsPath -string "$bootArgsWithVebose" $configFilePath; fi
-  if [[ $1 == "disable" && $isVerbose ]]; then plutil -replace $bootArgsPath -string "$bootArgsWithoutVebose" $configFilePath; fi
+  if [[ $1 == "enable" && ! $isVerbose ]]; then replaceBootArgs "$bootArgsWithVebose"; fi
+  if [[ $1 == "disable" && $isVerbose ]]; then replaceBootArgs "$bootArgsWithoutVebose"; fi
 }
 
 function switchToOCRelease() {
@@ -30,7 +42,7 @@ function switchToOCRelease() {
   cp RELEASE/OpenRuntime.efi $EFIFolder/OC/Drivers
   cp RELEASE/BOOTx64.efi $EFIFolder/BOOT
 
-  plutil -replace "Misc.Debug.Target" -integer 3 $configFilePath
+  replaceDebugTarget 3
   setVerbose "disable"
 }
 
@@ -40,7 +52,7 @@ function switchToOCDebug() {
   cp DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers
   cp DEBUG/BOOTx64.efi $EFIFolder/BOOT
 
-  plutil -replace "Misc.Debug.Target" -integer 67 $configFilePath
+  replaceDebugTarget 67
   setVerbose "enable"
 }
 
@@ -116,7 +128,7 @@ function printInfo() {
 
 if [[ ! $(mount | awk '$3 == "/Volumes/EFI" {print $3}') ]]; then
   clear
-  echo -e "\033[44mMounting EFI Partition. Enter password if neaded."; tput sgr0; echo
+  printHeader "Mounting EFI Partition. Enter password if neaded."; echo
 
   sudo diskutil mount EFI
 fi
@@ -132,7 +144,7 @@ else
 
     options=("Switch to OpenCore Release" "Switch to OpenCore Debug" "Toggle verbose mode" "Quit")
 
-    echo -e "\033[44mChoose an option:"; tput sgr0; echo
+    printHeader "Choose an option:"; echo
     select opt in "${options[@]}"; do
       case $REPLY in
       1)
