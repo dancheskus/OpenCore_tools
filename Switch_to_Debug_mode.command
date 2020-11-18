@@ -136,7 +136,7 @@ OCVer="0.6.2"
 firmwareType="X64"
 
 downloadFiles() {
-  mkcd "Files"
+  [ ! -d "Files" ] && mkcd "Files" || cd "Files"
   mkcd "$OCVer"
 
   download() {
@@ -173,5 +173,11 @@ filterFiles() {
   filter "RELEASE"
 }
 
-downloadFiles
-filterFiles
+
+debugFilePath="Files/$OCVer/DEBUG"
+releaseFilePath="Files/$OCVer/RELEASE"
+if [[ ! -f "$debugFilePath/Bootstrap.efi" || ! -f "$debugFilePath/BOOT$firmwareType.efi" || ! -f "$debugFilePath/OpenCore.efi" || ! -f "$debugFilePath/OpenRuntime.efi" || ! -f "$releaseFilePath/Bootstrap.efi" || ! -f "$releaseFilePath/BOOT$firmwareType.efi" || ! -f "$releaseFilePath/OpenCore.efi" || ! -f "$releaseFilePath/OpenRuntime.efi"  ]]; then
+  rm -rf Files/$OCVer
+  downloadFiles
+  filterFiles
+fi
