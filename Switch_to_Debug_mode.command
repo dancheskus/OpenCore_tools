@@ -44,58 +44,74 @@ function switchToOCDebug() {
   setVerbose "enable"
 }
 
+printHeader() {
+  printf "\033[44m$1\n"
+  tput sgr0
+}
+printTitle() {
+  printf "\033[1m$1\n"
+  tput sgr0
+}
+printKey() {
+  printf "   \033[1m$1: "
+}
+printValue() {
+  printf "\033[2m$1\n"
+  tput sgr0
+}
+
 function printInfo() {
   clear
 
-  echo -e "\033[44mThis app is working only with OC version 0.6.3"; tput sgr0; echo
+  printHeader "This app is working only with OC version 0.6.3 (x64)"; echo
 
   nvramOCRecord="$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version | awk '{print $2}')"
   nvramOCMode="$(echo $nvramOCRecord | awk -F- '{print $1}')"
   nvramOCVer="$(echo $nvramOCRecord | awk -F- '{print $2}')"
-  echo -e "\033[1mCurrent OpenCore version in NVRAM:"
-  tput sgr0
-  if [[ $nvramOCMode == "DBG" ]]; then echo -e "   \033[1mMode: \033[2mDebug (Is updating after reboot)"; fi
-  if [[ $nvramOCMode == "REL" ]]; then echo -e "   \033[1mMode: \033[2mRelease (Is updating after reboot)"; fi
-  tput sgr0
-  echo -e "   \033[1mVersion: \033[2m$nvramOCVer"
-  tput sgr0
-  if [[ $isVerbose ]]; then echo -e "   \033[1mVerbose mode enabled: \033[2mTrue"; fi
-  if [[ ! $isVerbose ]]; then echo -e "   \033[1mVerbose mode enabled: \033[2mFalse"; fi
-  tput sgr0
+
+  printTitle "Current OpenCore version in NVRAM:"
+  printKey "Mode"
+  if [[ $nvramOCMode == "DBG" ]]; then printValue "Debug (Is updating after reboot)"; fi
+  if [[ $nvramOCMode == "REL" ]]; then printValue "Release (Is updating after reboot)"; fi
+  
+  printKey "Version"; printValue $nvramOCVer
+  printKey "Verbose mode enabled"
+  if [[ $isVerbose ]]; then printValue "True"; fi
+  if [[ ! $isVerbose ]]; then printValue "False"; fi
+  
   echo
 
-  echo -e "\033[1mFile versions in EFI partition:"
-  tput sgr0
+  printTitle "File versions in EFI partition:"
+
 
   releaseBootFileNOTFound="$(diff RELEASE/BOOTx64.efi $EFIFolder/BOOT/BOOTx64.efi)"
   debugBootFileNOTFound="$(diff DEBUG/BOOTx64.efi $EFIFolder/BOOT/BOOTx64.efi)"
-  if [[ $releaseBootFileNOTFound ]]; then echo -e "   \033[1mBOOTx64.efi: \033[2mDebug"; fi
-  if [[ $debugBootFileNOTFound ]]; then echo -e "   \033[1mBOOTx64.efi: \033[2mRelease"; fi
-  tput sgr0
+  printKey "BOOTx64.efi"
+  if [[ $releaseBootFileNOTFound ]]; then printValue "Debug"; fi
+  if [[ $debugBootFileNOTFound ]]; then printValue "Release"; fi
+  
 
   releaseOpenCoreFileNOTFound="$(diff RELEASE/OpenCore.efi $EFIFolder/OC/OpenCore.efi)"
   debugOpenCoreFileNOTFound="$(diff DEBUG/OpenCore.efi $EFIFolder/OC/OpenCore.efi)"
-  if [[ $releaseOpenCoreFileNOTFound ]]; then echo -e "   \033[1mOpenCore.efi: \033[2mDebug"; fi
-  if [[ $debugOpenCoreFileNOTFound ]]; then echo -e "   \033[1mOpenCore.efi: \033[2mRelease"; fi
-  tput sgr0
+  printKey "OpenCore.efi"
+  if [[ $releaseOpenCoreFileNOTFound ]]; then printValue "Debug"; fi
+  if [[ $debugOpenCoreFileNOTFound ]]; then printValue "Release"; fi
+  
 
   releaseBootstrapFileNOTFound="$(diff RELEASE/Bootstrap.efi $EFIFolder/OC/Bootstrap/Bootstrap.efi)"
   debugBootstrapFileNOTFound="$(diff DEBUG/Bootstrap.efi $EFIFolder/OC/Bootstrap/Bootstrap.efi)"
-  if [[ $releaseBootstrapFileNOTFound ]]; then echo -e "   \033[1mBootstrap.efi: \033[2mDebug"; fi
-  if [[ $debugBootstrapFileNOTFound ]]; then echo -e "   \033[1mBootstrap.efi: \033[2mRelease"; fi
-  tput sgr0
+  printKey "Bootstrap.efi"
+  if [[ $releaseBootstrapFileNOTFound ]]; then printValue "Debug"; fi
+  if [[ $debugBootstrapFileNOTFound ]]; then printValue "Release"; fi
+  
 
   releaseOpenRuntimeFileNOTFound="$(diff RELEASE/OpenRuntime.efi $EFIFolder/OC/Drivers/OpenRuntime.efi)"
   debugOpenRuntimeFileNOTFound="$(diff DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers/OpenRuntime.efi)"
-  if [[ $releaseOpenRuntimeFileNOTFound ]]; then echo -e "   \033[1mOpenRuntime.efi: \033[2mDebug"; fi
-  if [[ $debugOpenRuntimeFileNOTFound ]]; then echo -e "   \033[1mOpenRuntime.efi: \033[2mRelease"; fi
-
-  tput sgr0
-  echo
-  echo
-  echo
-  echo
-  echo
+  printKey "OpenRuntime.efi"
+  if [[ $releaseOpenRuntimeFileNOTFound ]]; then printValue "Debug"; fi
+  if [[ $debugOpenRuntimeFileNOTFound ]]; then printValue "Release"; fi
+  
+  echo; echo; echo; echo; echo;
 }
 
 if [[ ! $(mount | awk '$3 == "/Volumes/EFI" {print $3}') ]]; then
