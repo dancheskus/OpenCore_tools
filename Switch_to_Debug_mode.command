@@ -68,10 +68,14 @@ printInfo() {
   if [[ $nvramOCMode == "REL" ]]; then printValue "Release (Is updating after reboot)"; fi
   
   printKey "Version"; printValue $nvramOCVer
+  
+  echo
+
+  printTitle "Config values:"
   printKey "Verbose mode enabled"
   if [[ $isVerbose ]]; then printValue "True"; fi
   if [[ ! $isVerbose ]]; then printValue "False"; fi
-  
+
   echo
 
   printTitle "File versions in EFI partition:"
@@ -123,9 +127,10 @@ else
     updateIsVerbose
     printInfo
 
-    options=("Switch to OpenCore Release" "Switch to OpenCore Debug" "Toggle verbose mode" "Quit")
+    options=("Switch to OpenCore Release" "Switch to OpenCore Debug" "Toggle verbose mode (-v)" "Quit")
 
     printHeader "Choose an option:"; echo
+    COLUMNS=0
     select opt in "${options[@]}"; do
       case $REPLY in
       1)
