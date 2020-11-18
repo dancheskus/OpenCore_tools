@@ -9,24 +9,16 @@ bootArgsPath="NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.boot-args"
 bootArgs=""
 isVerbose=""
 
-function replacePlist() {  
-  plutil -replace $1 $2 "$3" "$configFilePath"
-}
+replacePlist() { plutil -replace $1 $2 "$3" "$configFilePath"; }
+replaceBootArgs() { replacePlist "NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.boot-args" "-string" "$1"; }
+replaceDebugTarget() { replacePlist "Misc.Debug.Target" "-integer" $1; }
 
-function replaceBootArgs() {
-  replacePlist "NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.boot-args" "-string" "$1"
-}
-
-function replaceDebugTarget() {
-  replacePlist "Misc.Debug.Target" "-integer" $1
-}
-
-function updateIsVerbose() {
+updateIsVerbose() {
   bootArgs="$(plutil -extract $bootArgsPath xml1 -o - $configFilePath | grep string | awk -F "[><]" '{print $3}')"
   isVerbose="$(echo $bootArgs | awk '/-v/ {print}')"
 }
 
-function setVerbose() {
+setVerbose() {
   bootArgsWithoutVebose="$(echo $bootArgs | awk -F"-v" '{print $1,$2}' | awk -v OFS=' ' '{$1=$1}1')"
   bootArgsWithVebose="$bootArgsWithoutVebose -v"
 
@@ -36,7 +28,7 @@ function setVerbose() {
   if [[ $1 == "disable" && $isVerbose ]]; then replaceBootArgs "$bootArgsWithoutVebose"; fi
 }
 
-function switchToOCRelease() {
+switchToOCRelease() {
   cp RELEASE/OpenCore.efi $EFIFolder/OC
   cp RELEASE/Bootstrap.efi $EFIFolder/OC/Bootstrap
   cp RELEASE/OpenRuntime.efi $EFIFolder/OC/Drivers
@@ -46,7 +38,7 @@ function switchToOCRelease() {
   setVerbose "disable"
 }
 
-function switchToOCDebug() {
+switchToOCDebug() {
   cp DEBUG/OpenCore.efi $EFIFolder/OC
   cp DEBUG/Bootstrap.efi $EFIFolder/OC/Bootstrap
   cp DEBUG/OpenRuntime.efi $EFIFolder/OC/Drivers
@@ -56,23 +48,12 @@ function switchToOCDebug() {
   setVerbose "enable"
 }
 
-printHeader() {
-  printf "\033[44m$1\n"
-  tput sgr0
-}
-printTitle() {
-  printf "\033[1m$1\n"
-  tput sgr0
-}
-printKey() {
-  printf "   \033[1m$1: "
-}
-printValue() {
-  printf "\033[2m$1\n"
-  tput sgr0
-}
+printHeader() { printf "\033[44m$1\n"; tput sgr0; }
+printTitle() { printf "\033[1m$1\n"; tput sgr0; }
+printKey() { printf "   \033[1m$1: "; }
+printValue() { printf "\033[2m$1\n"; tput sgr0; }
 
-function printInfo() {
+printInfo() {
   clear
 
   printHeader "This app is working only with OC version 0.6.3 (x64)"; echo
