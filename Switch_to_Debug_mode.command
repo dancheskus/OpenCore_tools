@@ -9,10 +9,18 @@ bootArgsPath="NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82.boot-args"
 bootArgs=""
 isVerbose=""
 
+function updateIsVerbose() {
+  bootArgs="$(plutil -extract $bootArgsPath xml1 -o - $configFilePath | grep string | awk -F "[><]" '{print $3}')"
+  isVerbose="$(echo $bootArgs | awk '/-v/ {print}')"
+}
+
 function setVerbose() {
   bootArgsWithoutVebose="$(echo $bootArgs | awk -F"-v" '{print $1,$2}' | awk -v OFS=' ' '{$1=$1}1')"
+  bootArgsWithVebose="$bootArgsWithoutVebose -v"
 
-  if [[ $1 == "enable" && ! $isVerbose ]]; then plutil -replace $bootArgsPath -string "$bootArgsWithoutVebose -v" $configFilePath; fi
+  updateIsVerbose
+
+  if [[ $1 == "enable" && ! $isVerbose ]]; then plutil -replace $bootArgsPath -string "$bootArgsWithVebose" $configFilePath; fi
   if [[ $1 == "disable" && $isVerbose ]]; then plutil -replace $bootArgsPath -string "$bootArgsWithoutVebose" $configFilePath; fi
 }
 
@@ -103,8 +111,7 @@ if [[ ! $(mount | awk '$3 == "/Volumes/EFI" {print $3}') ]]; then
 else
 
   while true; do
-    bootArgs="$(plutil -extract $bootArgsPath xml1 -o - $configFilePath | grep string | awk -F "[><]" '{print $3}')"
-    isVerbose="$(echo $bootArgs | awk '/-v/ {print}')"
+    updateIsVerbose
     printInfo
 
     options=("Switch to OpenCore Release" "Switch to OpenCore Debug" "Toggle verbose mode" "Quit")
