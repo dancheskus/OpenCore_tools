@@ -52,13 +52,19 @@ printInfo() {
   nvramOCRecord="$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version | awk '{print $2}')"
   nvramOCMode="$(echo $nvramOCRecord | awk -F- '{print $1}')"
   nvramOCVer="$(echo $nvramOCRecord | awk -F- '{print $2}')"
+  nvramOCVerWithDots=""
+  for (( i = 0; i < ${#nvramOCVer}; ++i )); do
+    # adding dots in OC version
+    nvramOCVerWithDots="$nvramOCVerWithDots${nvramOCVer:$i:1}"
+    [[ $(($i+1)) != ${#nvramOCVer} ]] && nvramOCVerWithDots="$nvramOCVerWithDots."
+  done
 
   printTitle "Current OpenCore version in NVRAM:"
   printKey "Mode"
   if [[ $nvramOCMode == "DBG" ]]; then printValue "Debug (Is updating after reboot)"; fi
   if [[ $nvramOCMode == "REL" ]]; then printValue "Release (Is updating after reboot)"; fi
   
-  printKey "Version"; printValue $nvramOCVer
+  printKey "Version"; printValue $nvramOCVerWithDots
   
   echo
 
