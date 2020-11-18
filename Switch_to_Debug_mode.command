@@ -120,21 +120,11 @@ else
     COLUMNS=0
     select opt in "${options[@]}"; do
       case $REPLY in
-      1)
-        switchToOCRelease
-        break
-        ;;
-      2)
-        switchToOCDebug
-        break
-        ;;
-      3)
-        if [[ $isVerbose ]]; then setVerbose "disable"; fi
-        if [[ ! $isVerbose ]]; then setVerbose "enable"; fi
-        break
-        ;;
-      4) break 2 ;;
-      *) echo "What's that?" >&2 ;;
+        1) switchToOCRelease; break ;;
+        2) switchToOCDebug; break ;;
+        3) [[ $isVerbose ]] && setVerbose "disable" || setVerbose "enable"; break ;;
+        4) break 2 ;;
+        *) echo "What's that?" >&2 ;;
       esac
     done
   done
