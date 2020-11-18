@@ -142,7 +142,7 @@ downloadFiles() {
   download() {
     mkcd $1
     fileName="OpenCore-$OCVer-$1"
-    echo "Downloading $(echo $1 | awk '{print tolower($0)}') files ($OCVer)..."
+    echo "Downloading $firmwareType $(echo $1 | awk '{print tolower($0)}') files ($OCVer)..."
     curl -sOL https://github.com/acidanthera/OpenCorePkg/releases/download/$OCVer/$fileName.zip
     unzip -qq $fileName.zip
     rm $fileName.zip
